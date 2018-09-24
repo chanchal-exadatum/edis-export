@@ -1,0 +1,81 @@
+.LOGON 172.16.50.128/dbc,dbc;
+.IMPORT VARTEXT '|' FILE=/home/exa00077/Documents/output/20180921171058/STORE_LABOR_EMPLOYEE/STORE_LABOR_EMPLOYEE;
+.REPEAT *
+USING (
+	STORE_LABOR_FK           VARCHAR(100) ,
+	EmployeeId           VARCHAR(100) ,
+	EmployeeNmTypeCd     VARCHAR(100) ,
+	FormattedNm          VARCHAR(100) ,
+	GivenNm              VARCHAR(100) ,
+	NickNm               VARCHAR(100) ,
+	MiddleNm             VARCHAR(100) ,
+	FamilyNm             VARCHAR(100) ,
+	MaidenNm             VARCHAR(100) ,
+	EmployeeTypeCd      VARCHAR(100) ,
+	EmployeeAlternateId  VARCHAR(100)
+)
+
+INSERT INTO edis.STORE_LABOR_EMPLOYEE4_TEMP
+values(
+	:STORE_LABOR_FK
+	:EmployeeId,
+	:EmployeeNmTypeCd ,
+	:FormattedNm     ,
+	:GivenNm         ,
+	:NickNm          ,
+	:MiddleNm        ,
+	:FamilyNm        ,
+	:MaidenNm        ,
+	:EmployeeTypeCd   ,
+	:EmployeeAlternateId);
+
+UPDATE edis.STORE_LABOR_EMPLOYEE4 FROM (
+select STORE_LABOR_FK,EmployeeId ,         
+EmployeeNmTypeCd,     
+FormattedNm ,    
+GivenNm,   
+NickNm ,  
+MiddleNm, 
+FamilyNm,
+MaidenNm,
+EmployeeTypeCd      ,
+EmployeeAlternateId
+from edis.STORE_LABOR_EMPLOYEE4_TEMP) temp
+SET 
+STORE_LABOR_FK	     =temp.STORE_LABOR_FK ,
+EmployeeNmTypeCd     =temp.EmployeeNmTypeCd    , 
+FormattedNm          =temp.FormattedNm          ,
+GivenNm              =temp.GivenNm              ,
+NickNm               =temp.NickNm               ,
+MiddleNm             =temp.MiddleNm             ,
+FamilyNm             =temp.FamilyNm             ,
+MaidenNm             =temp.MaidenNm             ,
+EmployeeTypeCd      =temp.EmployeeTypeCd      ,
+EmployeeAlternateId  =temp.EmployeeAlternateId
+WHERE
+edis.STORE_LABOR_EMPLOYEE4.EmployeeId = temp.EmployeeId ;
+
+INSERT INTO edis.STORE_LABOR_EMPLOYEE4
+select
+A.STORE_LABOR_FK       ,
+A.EmployeeId           ,
+A.EmployeeNmTypeCd     ,
+A.FormattedNm          ,
+A.GivenNm              ,
+A.NickNm               ,
+A.MiddleNm             ,
+A.FamilyNm             ,
+A.MaidenNm             ,
+A.EmployeeTypeCd      	,
+A.EmployeeAlternateId  
+
+from edis.STORE_LABOR_EMPLOYEE4_TEMP A 
+LEFT JOIN  edis.STORE_LABOR_EMPLOYEE4 B ON 
+A.EmployeeId = B.EmployeeId where
+B.EmployeeId is NULL;
+
+delete edis.STORE_LABOR_EMPLOYEE4_TEMP;
+
+.QUIT;
+
+
